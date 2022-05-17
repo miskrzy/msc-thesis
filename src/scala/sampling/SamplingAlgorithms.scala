@@ -37,5 +37,6 @@ object SamplingAlgorithms {
 
     reader.close()
     writer.close()
+    println(name + " sampled with: s" + numberOfReservoirs + " a" + alpha + " c" + c)
   }
 }

@@ -1,0 +1,1 @@
+Contains calculated statistical parameters (standard deviation etc.) for datasets
