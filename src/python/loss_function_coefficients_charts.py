@@ -73,8 +73,25 @@ def plotHiperbolicCoefficients(size):
     plt.plot(xs, ys, label=("-ax+b/x"))
     plt.legend()
 
+#c*d^-(n-i)
+# steepness should be 1 to 10, bigger is less steep
+def plotExponentialCoefficients(steepness, size):
 
-if __name__ == '__main__':
+    d = 1.0 + 10.0 / 5.0 / float(size) * float(steepness)
+    c = math.log(d) / (1/d - math.pow(d, -size))
+    #print(c)
+
+    xs = [i for i in range(0, size)]
+    ys = [c * math.pow(d, (i-size)) for i in xs]
+    sums = 0
+    for i in ys:
+        sums += i
+    print(sums)
+
+    plt.plot(xs, ys, label=("c*d^-(n-i)_steepness" + str(steepness)))
+    plt.legend()
+
+def oneChart():
     size = 100000
     plotLinearCoefficients(0.0, size)
     plotLinearCoefficients(0.5, size)
@@ -87,3 +104,21 @@ if __name__ == '__main__':
     plotHiperbolicCoefficients(size)
     plt.savefig(plot_save_dir + "loss_func_coeffs_size_" + str(size) + ending_plot)
     plt.show()
+
+
+def exponentialChart():
+    size = 100000
+    plotExponentialCoefficients(1, size)
+    plotExponentialCoefficients(2, size)
+    plotExponentialCoefficients(3, size)
+    plotExponentialCoefficients(4, size)
+    plotExponentialCoefficients(7, size)
+    plotExponentialCoefficients(10, size)
+    plt.savefig(plot_save_dir + "loss_func_coeffs_exponential_size_" + str(size) + ending_plot)
+    plt.show()
+
+
+
+if __name__ == '__main__':
+    #oneChart()
+    exponentialChart()

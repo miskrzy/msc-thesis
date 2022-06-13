@@ -7,11 +7,11 @@ import scala.collection.mutable.ListBuffer
 object LossFunctionsMain {
   def main(args: Array[String]): Unit = {
 
-    calcForChosenParameters()
+    //calcForChosenParameters()
 
     calcAllIerpolatedFiles(false)
 
-    //killSpecifiedParams()
+    killSpecifiedParams()
 
   }
 
@@ -25,7 +25,13 @@ object LossFunctionsMain {
       new X3Coefficients(0.5),
       new X2NoTranslationCoefficients,
       new X5NoTranslationCoefficients,
-      new MinusAxPlusBOverXCoefficients
+      new MinusAxPlusBOverXCoefficients,
+      new ExponentialCoefficients(1.0),
+      new ExponentialCoefficients(2.0),
+      new ExponentialCoefficients(3.0),
+      new ExponentialCoefficients(4.0),
+      new ExponentialCoefficients(7.0),
+      new ExponentialCoefficients(10.0),
     )
 
     val powers = List(1.0, 2.0)
@@ -50,36 +56,38 @@ object LossFunctionsMain {
     val samplesWeather = List(1000, 20000)
 
     val alphaC = Map(0.5 -> List(0.1,0.2,0.5,0.05,0.15,0.25,0.33,0.66,0.75),
+      0.9 -> List(1.0,1.5,2.0,3.0,5.0,10.0),
+      0.95 -> List(1.0,1.5,2.0,3.0,5.0,10.0),
+      1.15 -> List(1.5,2.0,2.5,3.0,5.0,7.0,10.0,15.0,20.0,30.0),
       0.65 -> List(0.4,0.5,0.6,0.7,0.8),
       0.75 -> List(0.4,0.5,0.6,0.7,0.8),
       0.85 -> List(0.6,0.7,0.8),
       1.0 -> List(1.0,2.0,3.0,5.0,10.0),
       2.0 -> List(100.0,200.0,400.0,1000.0,2000.0,3000.0,4000.0),
-
+      1.25 -> List(2.0,2.5,3.0,5.0,7.0,10.0,15.0,20.0,30.0,40.0),
+      1.5 -> List(5.0,7.0,10.0,20.0,40.0,70.0,100.0,150.0,200.0,400.0),
+      1.75 -> List(20.0,40.0,100.0,250.0,500.0,1000.0,2000.0)
     )
 
 
-    val nameCoeffStockAC = List(
-      "AMZN" -> new AutocorrelationBasedCoefficients("AMZN",3500),
-      "bitcoin" -> new AutocorrelationBasedCoefficients("bitcoin",7500),
-      "bitcoin" -> new AutocorrelationBasedCoefficients("bitcoin",13000),
-      "GE" -> new AutocorrelationBasedCoefficients("GE",4500),
-      "GE" -> new AutocorrelationBasedCoefficients("GE",9000),
-      "MSFT" -> new AutocorrelationBasedCoefficients("MSFT",2500),
-      "MSFT" -> new AutocorrelationBasedCoefficients("MSFT",5000),
-    )
-
-    val nameCoeffStockSD = List(
-      "AMZN" -> new RollingStdDevBasedCoefficients("AMZN"),
-      "bitcoin" -> new RollingStdDevBasedCoefficients("bitcoin"),
-      "GE" -> new RollingStdDevBasedCoefficients("GE"),
-      "MSFT" -> new RollingStdDevBasedCoefficients("MSFT")
+    val nameCoeffStock = List(
+      "AMZN" -> List(new AutocorrelationBasedCoefficients("AMZN",3500),
+        new RollingStdDevBasedCoefficients("AMZN")),
+      "bitcoin" -> List(new AutocorrelationBasedCoefficients("bitcoin",7500),
+        new AutocorrelationBasedCoefficients("bitcoin",13000),
+        new RollingStdDevBasedCoefficients("bitcoin")),
+      "GE" -> List(new AutocorrelationBasedCoefficients("GE",4500),
+        new AutocorrelationBasedCoefficients("GE",9000),
+        new RollingStdDevBasedCoefficients("GE")),
+      "MSFT" -> List(new AutocorrelationBasedCoefficients("MSFT",2500),
+        new AutocorrelationBasedCoefficients("MSFT",5000),
+        new RollingStdDevBasedCoefficients("MSFT")),
     )
 
     val nameCoeffWeather = List(
-      "minneapolis" -> new AutocorrelationBasedCoefficients("minneapolis",2000),
-      "minneapolis" -> new AutocorrelationBasedCoefficients("minneapolis",4000),
-      "denpasar" -> new AutocorrelationBasedCoefficients("denpasar",6000)
+      "minneapolis" -> List(new AutocorrelationBasedCoefficients("minneapolis",2000)),
+      "minneapolis" -> List(new AutocorrelationBasedCoefficients("minneapolis",4000)),
+      "denpasar" -> List(new AutocorrelationBasedCoefficients("denpasar",6000))
     )
 
     val powers = List(1.0, 2.0)
@@ -87,13 +95,15 @@ object LossFunctionsMain {
     var lossFParams = ListBuffer[LossFunctionParameters]()
     val parameterMap = mutable.Map[String, List[LossFunctionParameters]]()
 
-    for((name, coeff) <- nameCoeffStockAC){
-      for((alpha, cs) <- alphaC){
-        for(c <- cs){
-          for(sample <- samplesStock){
-            for(power <- powers){
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new RelativeErrorLossFunction(coeff, power)))
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new LogarithmicErrorLossFunction(coeff, power)))
+    for((name, coeffs) <- nameCoeffStock){
+      for(coeff <- coeffs) {
+        for ((alpha, cs) <- alphaC) {
+          for (c <- cs) {
+            for (sample <- samplesStock) {
+              for (power <- powers) {
+                lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new RelativeErrorLossFunction(coeff, power)))
+                lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new LogarithmicErrorLossFunction(coeff, power)))
+              }
             }
           }
         }
@@ -102,28 +112,16 @@ object LossFunctionsMain {
       lossFParams = ListBuffer[LossFunctionParameters]()
     }
 
-    for((name, coeff) <- nameCoeffStockSD){
-      for((alpha, cs) <- alphaC){
-        for(c <- cs){
-          for(sample <- samplesStock){
-            for(power <- powers){
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new RelativeErrorLossFunction(coeff, power)))
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new LogarithmicErrorLossFunction(coeff, power)))
-            }
-          }
-        }
-      }
-      parameterMap.addOne(name, lossFParams.toList)
-      lossFParams = ListBuffer[LossFunctionParameters]()
-    }
 
-    for((name, coeff) <- nameCoeffWeather){
-      for((alpha, cs) <- alphaC){
-        for(c <- cs){
-          for(sample <- samplesWeather){
-            for(power <- powers){
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new RelativeErrorLossFunction(coeff, power)))
-              lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new LogarithmicErrorLossFunction(coeff, power)))
+    for((name, coeffs) <- nameCoeffWeather){
+      for(coeff <- coeffs) {
+        for ((alpha, cs) <- alphaC) {
+          for (c <- cs) {
+            for (sample <- samplesWeather) {
+              for (power <- powers) {
+                lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new RelativeErrorLossFunction(coeff, power)))
+                lossFParams.addOne(LossFunctionParameters(sample, alpha, c, new LogarithmicErrorLossFunction(coeff, power)))
+              }
             }
           }
         }

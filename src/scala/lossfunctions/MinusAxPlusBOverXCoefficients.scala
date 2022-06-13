@@ -8,7 +8,7 @@ class MinusAxPlusBOverXCoefficients extends Coefficients {
   private class MinusAxPlusBOverXCoefficientsIterator(datasetLength: Int) extends Iterator[Double] {
 
     val a = 1.0 / math.log((datasetLength.toDouble + datasetLength.toDouble / 10.0)/(datasetLength.toDouble / 10.0))
-    var i = 1
+    var i = 0
 
     override def hasNext: Boolean = i < datasetLength
 

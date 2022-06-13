@@ -14,7 +14,44 @@ object StatisticsCalculations {
   val statisticsPath = "data/statistics/"
   val stdDevEnding = "_stddev.csv"
   val varianceEnding = "_varia.csv"
+  val statTableEnding = "_table.csv"
   val rollingWindowStdDevEnding = "_rollStdDev.csv"
+
+  def calcTableStats(nameList: List[String]): Unit = {
+    val writer = new PrintWriter(new File(statisticsPath + "all" + statTableEnding))
+    writer.println("name,length,average,median,variance,std.dev.,rel.var.,rel.std.dev.")
+    for (name <- nameList) {
+
+      val reader = io.Source.fromFile(extractedDataPath + name + extracted_file_ending)
+      val data = reader.getLines().toList.map(_.toDouble)
+
+
+      val length = data.length
+      val average = data.sum / length.toDouble
+      val sortedData = data.sortWith((x,y) => x>y)
+      val median = if (length % 2 == 0) sortedData(length / 2) else (sortedData(length / 2) + sortedData(length / 2 + 1)) / 2.0
+      val variance = data.map(x => math.pow(x - average, 2.0)).sum / length.toDouble
+      val stddev = math.sqrt(variance)
+      val relvar = variance / average
+      val relstddev = stddev / average
+
+      writer.println(
+        name + "," +
+          length + "," +
+          average + "," +
+          median + "," +
+          variance + "," +
+          stddev + "," +
+          relvar + "," +
+          relstddev
+      )
+
+
+      reader.close()
+    }
+    writer.close()
+
+  }
 
   def calcRelStdDev(namesList: List[String]): Unit = {
     val resultMap = scala.collection.mutable.Map.empty[String, Double]
@@ -118,7 +155,7 @@ object StatisticsCalculations {
       stdDev / average
     }
 
-    for(i <- lines){
+    for (i <- lines) {
       result.addOne(calcRelStdDev(window.toList))
       window.remove(0)
       window.addOne(i.toDouble)
@@ -127,7 +164,7 @@ object StatisticsCalculations {
     reader.close()
 
     val writer = new PrintWriter(new File(statisticsPath + name + nameAddon + rollingWindowStdDevEnding))
-    for(i <- result){
+    for (i <- result) {
       writer.println(i)
     }
     writer.close()
@@ -135,16 +172,16 @@ object StatisticsCalculations {
     println("rolling std dev done for: " + name + " with: " + nameAddon)
   }
 
-  def rollingRelStdDevSingleRelWindowSizes(name: String, windowSizeFractions:List[Double]): Unit = {
+  def rollingRelStdDevSingleRelWindowSizes(name: String, windowSizeFractions: List[Double]): Unit = {
     val reader = io.Source.fromFile(extractedDataPath + name + extracted_file_ending)
     var length = 0
-    for(line <- reader.getLines())
+    for (line <- reader.getLines())
       length += 1
 
     val windowSizes = windowSizeFractions.map(f => (length.toDouble * f).toInt)
     val windFracIter = windowSizeFractions.iterator
 
-    for(windowSize <- windowSizes){
+    for (windowSize <- windowSizes) {
       rollingRelStdDevSingle(name, windowSize, "_" + windFracIter.next.toString)
     }
     println("all rolling std dev with fractions done for: " + name)
@@ -152,14 +189,14 @@ object StatisticsCalculations {
   }
 
   //first value is covariance, second is correlation
-  def calcAutoCovarianceCorelation(name: String, offset: Int): (Double, Double) ={
+  def calcAutoCovarianceCorelation(name: String, offset: Int): (Double, Double) = {
 
     val fullPath = extractedDataPath + name + extracted_file_ending
 
     //file length
     val readerLength = io.Source.fromFile(fullPath)
     var wholeFileLength = 0
-    for(i<-readerLength.getLines()){
+    for (i <- readerLength.getLines()) {
       wholeFileLength += 1
     }
     readerLength.close()
@@ -169,9 +206,9 @@ object StatisticsCalculations {
     var noOffsetAverage = 0.0
     var j = 0
     val linesNoOffset = readerNoOffset.getLines()
-    while(j<wholeFileLength-offset){
+    while (j < wholeFileLength - offset) {
       noOffsetAverage += linesNoOffset.next().toDouble
-      j+=1
+      j += 1
     }
     readerNoOffset.close()
     noOffsetAverage /= (wholeFileLength.toDouble - offset)
@@ -182,11 +219,11 @@ object StatisticsCalculations {
     var withOffsetAverage = 0.0
     j = 0
     val linesWithOffset = readerWithOffset.getLines()
-    while(j<offset){
+    while (j < offset) {
       linesWithOffset.next()
-      j+=1
+      j += 1
     }
-    for(i<-linesWithOffset){
+    for (i <- linesWithOffset) {
       withOffsetAverage += i.toDouble
     }
     readerWithOffset.close()
@@ -200,11 +237,11 @@ object StatisticsCalculations {
     j = 0
     val linesNoOffsetCalc = readerNoOffsetCalc.getLines()
     var elem = 0.0
-    while(j<wholeFileLength-offset){
+    while (j < wholeFileLength - offset) {
       elem = linesNoOffsetCalc.next().toDouble
       noOffsetList.addOne(elem - noOffsetAverage)
       noOffsetStdDev += math.pow(elem - noOffsetAverage, 2)
-      j+=1
+      j += 1
     }
     readerNoOffsetCalc.close()
     noOffsetStdDev = math.sqrt(noOffsetStdDev / noOffsetList.length.toDouble)
@@ -217,11 +254,11 @@ object StatisticsCalculations {
     val readerWithOffsetCalc = io.Source.fromFile(fullPath)
     j = 0
     val linesWithOffsetCalc = readerWithOffsetCalc.getLines()
-    while(j<offset){
+    while (j < offset) {
       linesWithOffsetCalc.next()
-      j+=1
+      j += 1
     }
-    for(i<-linesWithOffsetCalc){
+    for (i <- linesWithOffsetCalc) {
       withOffsetList.addOne(i.toDouble - withOffsetAverage)
       withOffsetStdDev += math.pow(i.toDouble - withOffsetAverage, 2)
     }
@@ -232,18 +269,18 @@ object StatisticsCalculations {
 
     //calc auto covariance
     var autoCovariance = 0.0
-    for((a,b) <- (withOffsetList zip noOffsetList)){
-      autoCovariance += a*b
+    for ((a, b) <- (withOffsetList zip noOffsetList)) {
+      autoCovariance += a * b
     }
     //minus 1 for unbiased estimator (whatever it means)
     autoCovariance /= (withOffsetList.length.toDouble - 1)
     (autoCovariance, autoCovariance / noOffsetStdDev / withOffsetStdDev)
   }
 
-  def writeAutoCorelationForDifferentSetsAndOffsets(paramset: Map[String,List[Int]]): Unit ={
-    for((name, offsets) <- paramset){
+  def writeAutoCorelationForDifferentSetsAndOffsets(paramset: Map[String, List[Int]]): Unit = {
+    for ((name, offsets) <- paramset) {
       val writer = new PrintWriter(new File(autocorellationPath + name + autocorellationEnding))
-      for(offset <- offsets){
+      for (offset <- offsets) {
         writer.println(offset + "," + calcAutoCovarianceCorelation(name, offset)._2)
       }
       writer.close()

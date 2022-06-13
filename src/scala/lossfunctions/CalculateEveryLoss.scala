@@ -82,6 +82,7 @@ object CalculateEveryLoss {
     val autocorDenpasar6000 = "autocor_denpasar6000"
     val autocorMinneapolis2000 = "autocor_minneapolis2000"
     val autocorMinneapolis4000 = "autocor_minneapolis4000"
+    val exponentialCoefficients = "c*d^(n-i)_steep"
 
 
       if(!Files.exists(Paths.get(lossFunctionsResultsDataPath + datasetName + loss_functions_file_ending))){
@@ -102,7 +103,12 @@ object CalculateEveryLoss {
       val lossF = lossFWhole(0) + "_" + lossFWhole(1)
       val lossFPower = lossFWhole(3).toDouble
       val coeffsWhole = params(4).split('_')
-      val coeffs = coeffsWhole(0) + "_" + coeffsWhole(1)
+      var coeffs = ""
+      try {
+        coeffs = coeffsWhole(0) + "_" + coeffsWhole(1)
+      }catch {
+        case _:Throwable => coeffs = coeffsWhole(0)
+      }
       var coeffInitFrac = - 1.0
       try {
         coeffInitFrac = coeffsWhole(3).toDouble
@@ -130,6 +136,7 @@ object CalculateEveryLoss {
       if(coeffs == autocorDenpasar6000) coeffParam = new AutocorrelationBasedCoefficients("denpasar", 6000)
       if(coeffs == autocorMinneapolis2000) coeffParam = new AutocorrelationBasedCoefficients("minneapolis", 2000)
       if(coeffs == autocorMinneapolis4000) coeffParam = new AutocorrelationBasedCoefficients("bitcoin", 4000)
+      if(coeffs == exponentialCoefficients) coeffParam = new ExponentialCoefficients(coeffInitFrac)
 
       var lossFParam: LossFunction = new RelativeErrorLossFunction(coeffParam, lossFPower)
       if(lossF == lossFLogStr) lossFParam = new LogarithmicErrorLossFunction(coeffParam, lossFPower)
