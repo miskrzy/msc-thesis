@@ -51,11 +51,11 @@ object ReadiblingLogic {
       val firstLine = lines.next().split(",")
       writer.println(
         "dataset\t" +
-        "number of samples\t" +
+        "samples\t" +
         "$\\alpha$\t" +
         "c\t" +
-        "loss function type\t" +
-        "loss function coefficients\t" +
+        "loss func. type\t" +
+        "loss func. coeff.\t" +
         "result"
       )
       for(line <- lines){
@@ -86,13 +86,13 @@ object ReadiblingLogic {
 
       val firstLine = lines.next().split(",")
       writer.println(
-        "loss function coefficients\t" +
-          "number of samples\t" +
+        "loss func. coeff.\t" +
+          "samples\t" +
           "$\\alpha$\t" +
           "c\t" +
-          "sum of coefficients\t" +
-          "sum excluding repetitions\t" +
-          "sum of last n coefficients"
+          "sum of coeff.\t" +
+          "sum excl. rep.\t" +
+          "sum last n coeff."
       )
       for(line <- lines){
         val lineList = line.split(",")
@@ -128,8 +128,8 @@ object ReadiblingLogic {
         "dataset\t" +
           "$\\alpha$\t" +
           "c\t" +
-          "loss function coefficients\t" +
-          "first norm"
+          "loss func. coeff.\t" +
+          "$L_1$"
       )
       for(line <- lines){
         val lineList = line.split(",")

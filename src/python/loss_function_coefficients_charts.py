@@ -14,7 +14,7 @@ def plotX2noTranslationCoefficients(size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("ax^2"))
+    plt.plot(xs, ys, label=("$f(x)=a\cdot x^2$"))
     plt.legend()
 
 def plotX5noTranslationCoefficients(size):
@@ -27,7 +27,7 @@ def plotX5noTranslationCoefficients(size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("ax^5"))
+    plt.plot(xs, ys, label=("$f(x)=a\cdot x^5$"))
     plt.legend()
 
 def plotLinearCoefficients(initialFraction, size):
@@ -41,9 +41,8 @@ def plotLinearCoefficients(initialFraction, size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("ax+b_initfrac_" + str(initialFraction)))
+    plt.plot(xs, ys, label=("$f(x)=ax+b,\, f(0)=" + str(initialFraction) + "$"))
     plt.legend()
-
 
 def plotX3Coefficients(initialFraction, size):
     b = (size - 1) / 2
@@ -57,7 +56,7 @@ def plotX3Coefficients(initialFraction, size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("a(x-b)^3+c_initfrac_" + str(initialFraction)))
+    plt.plot(xs, ys, label=("$f(x)=a(x-b)^3+c,\, f(0)=" + str(initialFraction) + "$"))
     plt.legend()
 
 def plotHiperbolicCoefficients(size):
@@ -70,7 +69,7 @@ def plotHiperbolicCoefficients(size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("-ax+b/x"))
+    plt.plot(xs, ys, label=("$f(x)=\\frac{a}{x+b}$"))
     plt.legend()
 
 #c*d^-(n-i)
@@ -88,17 +87,17 @@ def plotExponentialCoefficients(steepness, size):
         sums += i
     print(sums)
 
-    plt.plot(xs, ys, label=("c*d^-(n-i)_steepness" + str(steepness)))
+    plt.plot(xs, ys, label=("$f(x)=c(1+d\cdot p)^x,\, p=" + str(steepness)+"$"))
     plt.legend()
 
 def oneChart():
     size = 100000
-    plotLinearCoefficients(0.0, size)
-    plotLinearCoefficients(0.5, size)
-    plotLinearCoefficients(1.0, size)
-    plotX3Coefficients(0.0, size)
-    plotX3Coefficients(0.5, size)
-    plotX3Coefficients(1.0, size)
+    # plotLinearCoefficients(0.0, size)
+    # plotLinearCoefficients(0.5, size)
+    # plotLinearCoefficients(1.0, size)
+    # plotX3Coefficients(0.0, size)
+    # plotX3Coefficients(0.5, size)
+    # plotX3Coefficients(1.0, size)
     plotX2noTranslationCoefficients(size)
     plotX5noTranslationCoefficients(size)
     plotHiperbolicCoefficients(size)
@@ -120,5 +119,5 @@ def exponentialChart():
 
 
 if __name__ == '__main__':
-    #oneChart()
-    exponentialChart()
+    oneChart()
+    #exponentialChart()
